@@ -1,7 +1,11 @@
 designSize=$1
 endII=$2
 comment=$3
-echo "test size is $designSize, endII is $endII, comment is $comment"
+if [ $# -lt 4 ]
+then
+	echo "./run.sh designSize endII coment"
+	exit
+fi
 
 if [ -d "${designSize}_${comment}" ]
 then
