@@ -1,44 +1,58 @@
-designSize=$1
-endII=$2
-comment=$3
-if [ $# -lt 4 ]
+# automation to copy input folder, 
+# generate output, and result folder
+repo=$1
+designSize=$2
+endII=$3
+comment=$repo
+
+# repo for the output project folder
+repoOut="../EnergyOut/${repo}_out"
+
+# repo for the output result folder
+resultOut="../ResultOut"
+
+# check input parameters
+if [ $# -lt 3 ]
 then
-	echo "./run.sh designSize endII coment"
+	echo "./run.sh repo designSize endII"
 	exit
 fi
 
-if [ -d "${designSize}_${comment}" ]
+# check repos
+if [ ! -d "$resultOut" ]
 then
-	:
-else
-	mkdir ${designSize}_${comment};
+	mkdir -p $resultOut;
 fi
 
-if [ -f "mm_${designSize}_${comment}.result" ]
+if [ ! -d "${repoOut}/${designSize}_${comment}" ]
 then
-	:
-else
-echo "designSize II total signal logic bram dsp" >> mm_${designSize}_${comment}.result
+	mkdir -p ${repoOut}/${designSize};
 fi
 
-if [ -f "mm_kernel_${designSize}_${comment}.result" ]
+# check results
+if [ ! -f "${resultOut}/mm_${designSize}_${comment}.result" ]
 then
-	:
-else
-echo "designSize II total signal logic bram dsp" >> mm_kernel_${designSize}_${comment}.result
+echo "designSize II total signal logic bram dsp" >> ${resultOut}/${repo}_${designSize}.result
+fi
+
+if [ ! -f "mm_kernel_${designSize}_${comment}.result" ]
+then
+echo "designSize II total signal logic bram dsp" >> ${resultOut}/${repo}_kernel_${designSize}.result
 fi
 
 i=$designSize
 
+
+
 while [ $i  -ge "$endII" ]
 do
 	echo $i;
-	cp -rf testBroadcast_cpy_gold ${designSize}_${comment}/testBroadcast_${designSize}_${i}_${comment}; 
-	cd ${designSize}_${comment}/testBroadcast_${designSize}_${i}_${comment};
+	cp -rf $repo ${repoOut}/${designSize}/${repo}_${designSize}_${i}; 
+	cd ${repoOut}/${designSize}/${repo}_${designSize}_${i};
 	#ls run.sh -lrht;
 	sh run.sh $designSize $i $comment;
-	cd ../..;
-	echo $designSize $i `./parsePWRmm.sh ${designSize}_${i}.${comment}_impl.pwr` >> mm_${designSize}_${comment}.result
-	echo $designSize $i `./parsePWRkernel.sh ${designSize}_${i}.${comment}_impl.pwr` >> mm_kernel_${designSize}_${comment}.result
+	cd ../../..;
+	echo $designSize $i `./parsePWRmm.sh ${designSize}_${i}.${comment}_impl.pwr` >> ${resultOut}/${repo}_${designSize}.result
+	echo $designSize $i `./parsePWRkernel.sh ${designSize}_${i}.${comment}_impl.pwr` >> ${resultOut}/${repo}_kernel_${designSize}.result
 	i=$((i/2))
 done
